@@ -9,6 +9,7 @@ def scrape_from_internet(npage=1, start_page=1):
     responses = []
     for i in range(npage):
         page = start_page + i
+        print(f'Fetching page {page}')
         response = requests.get(f"https://www.belgianbeerfactory.com/en/belgian-beer/page{page}.html")
         if len(response.history) > 0:
             break
@@ -31,7 +32,7 @@ def parse(html):
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
-            urllib.request.urlretrieve(image_url, f"raw_data/images/{image_path}")
+            urllib.request.urlretrieve(image_url, f"raw_data/images/bbf/{image_path}")
             beers.append({"beer_name":beer_name, "image_path": image_path})
         else:
             print(f"Error for {beer_name}")
