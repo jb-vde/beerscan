@@ -23,11 +23,18 @@ def parse(html):
     beers = []
     for beer in soup.find_all("div", class_="product-item"):
         beer_name = beer.find("span", class_="title").string.split(' - ')[0].strip()
-        beer_name = " ".join(beer_name.replace('/', '-').split()[:-1])
+        beer_name = beer_name.replace('/', '-').replace('.', '_').lower()
+        beer_name_list = beer_name.split()
+        volume  = beer_name_list[-1]
+        beer_name = " ".join(beer_name_list[:-1]) + f" - {volume}"
+
+
+        # beer_name = " ".join(beer_name.replace('/', '-').split()[:-1])
         image_url = beer.find("img", class_='img-responsive').get('src', 'Sorry')
 
         extension = image_url.split('.')[-1]
-        image_path = f'bh_{"_".join(beer_name.split()).lower()}.{extension}'
+        beer_name_img = "_".join(beer_name.replace('-', ' ').split())
+        image_path = f'bh_{beer_name_img}.{extension}'
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
