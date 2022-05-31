@@ -6,4 +6,8 @@ raw_data/
 *.csv
 **/__pycache__/
 .env
+<<<<<<< HEAD
 .vscode/
+=======
+.vscode
+>>>>>>> jh_dev
