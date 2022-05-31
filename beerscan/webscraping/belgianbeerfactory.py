@@ -10,7 +10,7 @@ def scrape_from_internet(npage=1, start_page=1):
     for i in range(npage):
         page = start_page + i
         print(f'Fetching page {page}')
-        response = requests.get(f"https://www.belgianbeerfactory.com/en/belgian-beer/page{page}.html")
+        response = requests.get(f"https://www.belgianbeerfactory.com/fr/biere-belge/page{page}.html")
         if len(response.history) > 0:
             break
         responses.append(response)
@@ -22,13 +22,14 @@ def parse(html):
     soup = BeautifulSoup(html, "html.parser")
     beers = []
     for beer in soup.find_all("div", class_ = "product-block text-left"):
-        beer_name = beer.find("a", class_ = "title").string.split('-')[0].strip()
-        beer_name = beer_name.replace('/', '-')
+        beer_name = beer.find("a", class_ = "title").string.strip()
+        beer_name = beer_name.replace('/', '-').replace('.', '_').lower()
         image_url = beer.find("img").get('src', False)
         if not image_url:
             image_url = beer.find("img").get('data-src', 'Sorry')
         extension = image_url.split('.')[-1]
-        image_path = f'bbf_{"_".join(beer_name.split()).lower()}.{extension}'
+        beer_name_img = "_".join(beer_name.replace('-', ' ').split())
+        image_path = f'bbf_{beer_name_img}.{extension}'
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
