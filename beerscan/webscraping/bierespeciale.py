@@ -11,9 +11,9 @@ def scrape_images(url):
     soup = BeautifulSoup(html.content, 'html.parser')
 
     images = soup.find_all("img", {"class": "product-miniature__img"})
-    names = soup.find_all("p", {"class": "product-miniature__manufacturer-name"})
+    names = soup.find_all("h2", {"class": "product-miniature__title"})
 
-    names = [image.text.lower() for image in images]
+    names = [name.a.text.lower() for name in names]
     images = [image["src"] for image in images]
 
     return pd.DataFrame({"beer_name": names,
@@ -30,8 +30,14 @@ def download_images(scrape_results, path):
                               .replace(".", "")\
                               .replace("/", "")\
                               .replace("\\", "") + extension
-        urlretrieve(image_url, path + image_name)
-        image_path.append(image_name)
+        try:
+            urlretrieve(image_url, path + image_name)
+            image_path.append(image_name)
+        except:
+            print(beer_name, image_url)
+            names = names[names != beer_name]
+            images = images[images != image_url]
+            print(f"\t> Couldn't download {image_url}")
 
     return pd.DataFrame({"name": names,
                          "image_path": image_path,
@@ -43,11 +49,13 @@ def scrape_next_page(url):
     soup = BeautifulSoup(html.content, 'html.parser')
 
     next_page = soup.find("a", {"rel": "next", "class": "next"})
-    return next_page["href"]
+    if next_page:
+        return next_page["href"]
+    return None
 
 
 if __name__ == "__main__":
-    next = scrape_next_page("https://biere-speciale.be/fr/3-les-bieres")
+    next = "https://biere-speciale.be/fr/3-les-bieres"
     data = pd.DataFrame({"name":[], "image_path":[]})
 
     while next:
@@ -56,5 +64,4 @@ if __name__ == "__main__":
         data = pd.concat([data, dl_info.drop(columns=["image_url"])], ignore_index=True)
         next = scrape_next_page(next)
 
-    #data.to_csv("raw_data/csv/bs_scraping.csv")
-    print(data)
+    data.to_csv("raw_data/csv/bs_scraping.csv")
