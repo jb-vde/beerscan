@@ -7,5 +7,4 @@ raw_data/
 **/__pycache__/
 .env
 .vscode/
-.vscode/settings.json
 notebooks/
