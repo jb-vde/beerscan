@@ -3,7 +3,7 @@ import base64
 import json
 import cv2
 
-URL_BASE = 'http://localhost:8000'
+URL_BASE = 'https://beerscan-image-wkgvoiogvq-ew.a.run.app'
 URL_BOXES = URL_BASE + '/predict_boxes'
 URL_SIZE = URL_BASE + '/size'
 
@@ -47,7 +47,7 @@ def test_boxes_endpoint(img_b64):
 
 def main():
 
-    image_file = 'raw_data/images/test_bottle.jpg'
+    image_file = 'raw_data/images/test_amis.jpg'
     image = cv2.imread(image_file)
 
     with open(image_file, "rb") as f:

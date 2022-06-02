@@ -1,4 +1,3 @@
-from sys import flags
 from fastapi import FastAPI, File, Request
 import cv2
 import numpy as np
