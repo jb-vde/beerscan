@@ -4,9 +4,11 @@ import cv2 as cv
 from scipy import ndimage, misc
 import os
 
+
 from sklearn.neighbors import NearestNeighbors
 
-from annoy import AnnoyIndex
+from beerscan.model.estimators import annoy_est
+
 
 import time
 
@@ -38,7 +40,7 @@ if __name__ == "__main__":
     n_features = 300  # Number of features to extract from images
     image_directory = "raw_data/images/bbf/" # Dataset directory
     images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv") # CSV describing dataset
-    IMG = cv.imread('raw_data/images/moinette.jpg') # Image to identify
+    IMG = cv.imread('raw_data/images/jupi.jpg') # Image to identify
 
     # Cleaning packs and "lots"
     print(f'Dataset shape before cleaning : {images_df.shape}')
@@ -82,20 +84,11 @@ if __name__ == "__main__":
     #    https://github.com/spotify/annoy   #
     #########################################
     if ANNOY:
-        print("\n####  ANNOY  ####\n")
-        vec_dim = len(descriptors[0])
-        annoy = AnnoyIndex(vec_dim, 'euclidean')
-        for i, vect in enumerate(all_descriptors):
-            annoy.add_item(i, vect)
-        annoy.build(10) # 10 trees
 
-        counter = 0
-        for vect in descriptors:
-            print(f"\rcomputing {counter}/{n_features}", end="")
-            neighbors = annoy.get_nns_by_vector(vect, 5, search_k=-1, include_distances=False)
-            for i in range(len(neighbors)):
-                images_df.loc[images_df['beer_name'] == mapping[neighbors[i]], 'score'] += (len(neighbors) - i)**2
-            counter+=1
+        neighbors = annoy_est.annoy(descriptors, all_descriptors, metric="angular", trees=10, verbose=1)
+        for group in neighbors:
+            for i in range(len(group)):
+                images_df.loc[images_df['beer_name'] == mapping[group[i]], 'score'] += (len(group) - i)**2
 
         print("\n",images_df.sort_values(by=["score"], ascending=False).head(5))
         print("--- %s seconds ---" % (time.time() - start_time))
