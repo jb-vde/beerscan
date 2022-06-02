@@ -53,3 +53,9 @@ pypi_test:
 
 pypi:
 	@twine upload dist/* -u $(PYPI_USERNAME)
+
+
+##### Prediction API - - - - - - - - - - - - - - - - - - - - - - - - -
+
+run_api:
+	uvicorn beerscan.api.fast:app --reload  # load web server with code autoreload

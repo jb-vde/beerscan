@@ -41,7 +41,6 @@ blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843,
 print("[INFO] computing object detections...")
 net.setInput(blob)
 detections = net.forward()
-print(detections.shape)
 
 # loop over the detections
 for i in np.arange(0, detections.shape[2]):
@@ -57,7 +56,10 @@ for i in np.arange(0, detections.shape[2]):
 		# the object
         idx = int(detections[0, 0, i, 1])
         box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+        box = np.maximum(np.array(box), 0)
         (startX, startY, endX, endY) = box.astype("int")
+        img_crop = image[startY:endY, startX:endX, :]
+        cv2.imshow("Cropped Image", img_crop)
 		# display the prediction
         label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
         print("[INFO] {}".format(label))
