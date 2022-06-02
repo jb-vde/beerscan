@@ -2,6 +2,57 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.request
 import pandas as pd
+import cv2
+import  numpy as np
+
+def crop_image(image_path):
+
+    CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+        "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+        "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+        "sofa", "train", "tvmonitor"]
+
+    prototxt = 'beerscan/model/bottle_detection/MobileNetSSD_deploy.prototxt.txt'
+    caffe_model = 'beerscan/model/bottle_detection/MobileNetSSD_deploy.caffemodel'
+
+    # load our serialized model from disk
+    net = cv2.dnn.readNetFromCaffe(prototxt, caffe_model)
+
+    image = cv2.imread(image_path)
+    (h, w) = image.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843,
+	(300, 300), 127.5)
+
+    # pass the blob through the network and obtain the detections and
+    # predictions
+    net.setInput(blob)
+    detections = net.forward()
+
+    boxes = {}
+    # loop over the detections
+    j = 0
+    for i in np.arange(0, detections.shape[2]):
+        # extract the confidence (i.e., probability) associated with the
+        # prediction
+        confidence = detections[0, 0, i, 2]
+        idx = int(detections[0, 0, i, 1])
+        is_bottle = CLASSES[idx] == 'bottle'
+        # filter out weak detections by ensuring the `confidence` is
+        # greater than the minimum confidence
+
+
+        if is_bottle and confidence > 0.5:
+            j += 1
+            # extract the index of the class label from the `detections`,
+            # then compute the (x, y)-coordinates of the bounding box for
+            # the object
+
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            box = np.maximum(np.array(box), 0)
+            (startX, startY, endX, endY) = box.astype("int")
+            img_crop = image[startY:endY, startX:endX, :]
+
+    cv2.imwrite(image_path, img_crop)
 
 
 def scrape_from_internet(npage=1, start_page=1):
@@ -29,12 +80,14 @@ def parse(html):
             image_url = beer.find("img").get('data-src', 'Sorry')
         extension = image_url.split('.')[-1]
         beer_name_img = "_".join(beer_name.replace('-', ' ').split())
-        image_path = f'bbf_{beer_name_img}.{extension}'
+        image_name = f'bbf_{beer_name_img}.{extension}'
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
-            urllib.request.urlretrieve(image_url, f"raw_data/images/bbf/{image_path}")
-            beers.append({"beer_name":beer_name, "image_path": image_path})
+            image_path = f"raw_data/images/bbf/{image_name}"
+            urllib.request.urlretrieve(image_url, image_path)
+            crop_image(image_path)
+            beers.append({"beer_name":beer_name, "image_path": image_name})
         else:
             print(f"Error for {beer_name}")
     return beers
