@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     while next:
         print("scraping ", next, "...")
-        dl_info = download_images(scrape_images(next), "raw_data/images/")
+        dl_info = download_images(scrape_images(next), "raw_data/images/bs/")
         data = pd.concat([data, dl_info.drop(columns=["image_url"])], ignore_index=True)
         next = scrape_next_page(next)
 
