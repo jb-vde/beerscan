@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
     n_features = 300  # Number of features to extract from images
     image_directory = "raw_data/images/bbf/" # Dataset directory
-    images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv") # CSV describing dataset
-    IMG = cv.imread('raw_data/images/jupi.jpg') # Image to identify
+    images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv", ignore_index=True) # CSV describing dataset
+    IMG = cv.imread('raw_data/images/IMG_20220602_172323.jpg') # Image to identify
 
     # Cleaning packs and "lots"
     print(f'Dataset shape before cleaning : {images_df.shape}')
