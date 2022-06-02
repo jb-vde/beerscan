@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
     n_features = 300  # Number of features to extract from images
     image_directory = "raw_data/images/bbf/" # Dataset directory
-    images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv", ignore_index=True) # CSV describing dataset
-    IMG = cv.imread('raw_data/images/IMG_20220602_172323.jpg') # Image to identify
+    images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv", index_col=0) # CSV describing dataset
+    IMG = cv.imread('raw_data/images/cropped_img.jpg') # Image to identify
 
     # Cleaning packs and "lots"
     print(f'Dataset shape before cleaning : {images_df.shape}')
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     #########################################
     if ANNOY:
 
-        neighbors = annoy_est.annoy(descriptors, all_descriptors, metric="angular", trees=10, verbose=1)
+        neighbors = annoy_est.annoy(descriptors, all_descriptors, metric="angular", trees=3, verbose=1)
         for group in neighbors:
             for i in range(len(group)):
                 images_df.loc[images_df['beer_name'] == mapping[group[i]], 'score'] += (len(group) - i)**2
