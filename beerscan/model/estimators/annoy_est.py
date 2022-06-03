@@ -1,5 +1,33 @@
 from annoy import AnnoyIndex
+
+import pandas as pd
 import time
+
+
+def build_from_df(vec_dim, descriptors_df:pd.DataFrame, metric="angular", n_trees=10,
+                  verbose=False):
+
+    if verbose:
+        print("\n> Building ANNOY...")
+        start_time = time.time()
+
+    # TODO: Check descriptors_df format (columns match expectations)
+
+    annoy = AnnoyIndex(vec_dim, metric)
+
+    for index, row in descriptors_df.iterrows():
+
+        if verbose:
+            print(f"\rAdding vectors : {index}", end="")
+
+        annoy.add_item(index, row["descriptor"])
+    annoy.build(n_trees)
+
+    if verbose:
+        build_time = time.time() - start_time
+        print(f"ANNOY built in {build_time} seconds")
+
+    return annoy
 
 
 def build_annoy(data_descriptors, metric="angular", n_trees=10, verbose=False,
@@ -31,7 +59,7 @@ def build_annoy(data_descriptors, metric="angular", n_trees=10, verbose=False,
     return annoy
 
 
-def run_annoy(img_descriptors, annoy, verbose):
+def run_annoy(img_descriptors, annoy, verbose=False):
 
     neighbors = []
 
@@ -52,12 +80,13 @@ def run_annoy(img_descriptors, annoy, verbose):
     return neighbors
 
 
-def load_annoy(vector_dim):
+def load_annoy(vector_dim, model_path, metric="angular"):
 
-    annoy = AnnoyIndex(vector_dim)
-    annoy.load('model.ann')
+    annoy = AnnoyIndex(vector_dim, metric=metric)
+    annoy.load(model_path)
 
     return annoy
+
 
 
 
