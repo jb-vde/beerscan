@@ -1,3 +1,5 @@
+from pyexpat import model
+from selectors import DefaultSelector
 import numpy as np
 import pandas as pd
 import cv2 as cv
@@ -30,10 +32,45 @@ def draw_keypoints(img, keypoints):
     return cv.drawKeypoints(gray,keypoints,img,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 
+def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFrame:
+        beer_names = []
+        keypoints = []
+        descriptors = []
+
+        if verbose:
+            print("> SIFT Dataset")
+            start_time = time.time()
+
+        # TODO: Check images_df format (columns match expectations)
+
+        for index, row in images_df.iterrows():
+
+            if verbose:
+                print(f"\rcomputing {index}", end="")
+
+            img = cv.imread(os.path.join(image_directory, row["image_path"]))
+            kp, desc = do_sift(img, n_features)
+            for vector, keyp in zip(desc, kp):
+                descriptors.append(vector)
+                keypoints.append(keyp)
+                beer_names.append(row["beer_name"])
+
+        if verbose:
+            run_time = time.time() - start_time
+            print(f"\nSIFT ran in {run_time} seconds")
+
+        return pd.DataFrame({"beer_name" : beer_names,
+                             "keypoint" : keypoints,
+                             "descriptor" : descriptors})
+
+
 
 if __name__ == "__main__":
 
     ANNOY = True
+    DRAW_FEATURES = True
+
+    ANN_MODEL_PATH = "beerscan/data/model.ann"
 
     start_time = time.time()
 
@@ -52,23 +89,11 @@ if __name__ == "__main__":
     # SIFT on dataset #
     ###################
 
-    mapping = []
-    all_descriptors = []
-    all_keypoints = []
+    dataset_sift = sift_from_dataframe(images_df, verbose=True)
 
-    print("> SIFT Dataset")
+    # TODO: Save / Load sift
 
-    for index, row in images_df.iterrows():
-        print(f"\rcomputing {index}", end="")
-        img = cv.imread(os.path.join(image_directory, row["image_path"]))
-        kp, desc = do_sift(img, n_features)
-        for vector, keyp in zip(desc, kp):
-            all_descriptors.append(vector)
-            all_keypoints.append(keyp)
-            # Match index of vector with corresponding beer name
-            mapping.append(row["beer_name"])
-
-    print("\n--- %s seconds ---" % (time.time() - start_time))
+    print(dataset_sift)
 
     #############################
     # SIFT on image to identify #
@@ -85,13 +110,27 @@ if __name__ == "__main__":
     #########################################
     if ANNOY:
 
-        neighbors = annoy_est.annoy(descriptors, all_descriptors, metric="angular", trees=3, verbose=1)
+        vec_dim = len(dataset_sift["descriptor"].iloc[0])
+
+        try:
+            annoy = annoy_est.load_annoy(vec_dim, ANN_MODEL_PATH)
+            print("Loaded ANNOY Model !")
+        except IOError:
+            annoy = annoy_est.build_from_df(vec_dim, dataset_sift)
+            annoy.save(ANN_MODEL_PATH)
+            print("Built and Saved ANNOY Model")
+
+        neighbors = annoy_est.run_annoy(descriptors, annoy, verbose=False)
+
         for group in neighbors:
             for i in range(len(group)):
-                images_df.loc[images_df['beer_name'] == mapping[group[i]], 'score'] += (len(group) - i)**2
+                images_df.loc[images_df["beer_name"] == dataset_sift.at[group[i], "beer_name"], 'score'] += (len(group) - i)**2
 
         print("\n",images_df.sort_values(by=["score"], ascending=False).head(5))
         print("--- %s seconds ---" % (time.time() - start_time))
+
+        # TODO: Draw features on images
+
 
 
     ###########################
