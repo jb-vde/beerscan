@@ -28,9 +28,9 @@ def crop_image(image_path):
     net.setInput(blob)
     detections = net.forward()
 
-    boxes = {}
-    # loop over the detections
-    j = 0
+
+    found_bottle = False
+
     for i in np.arange(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
         # prediction
@@ -41,8 +41,8 @@ def crop_image(image_path):
         # greater than the minimum confidence
 
 
-        if is_bottle and confidence > 0.5:
-            j += 1
+        if is_bottle and confidence > 0.85:
+
             # extract the index of the class label from the `detections`,
             # then compute the (x, y)-coordinates of the bounding box for
             # the object
@@ -52,7 +52,10 @@ def crop_image(image_path):
             (startX, startY, endX, endY) = box.astype("int")
             img_crop = image[startY:endY, startX:endX, :]
 
-    cv2.imwrite(image_path, img_crop)
+            cv2.imwrite(image_path, img_crop)
+            found_bottle = True
+
+    return found_bottle
 
 
 def scrape_from_internet(npage=1, start_page=1):
@@ -84,16 +87,16 @@ def parse(html):
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
-            image_path = f"raw_data/images/bbf/{image_name}"
+            image_path = f"raw_data/images/{image_name}"
             urllib.request.urlretrieve(image_url, image_path)
-            crop_image(image_path)
-            beers.append({"beer_name":beer_name, "image_path": image_name})
+            if crop_image(image_path):
+                beers.append({"beer_name":beer_name, "image_path": image_name})
         else:
             print(f"Error for {beer_name}")
     return beers
 
 
-def main():
+def main_bbf():
     beers = []
     for i, page in enumerate(scrape_from_internet(51)):
         print(f'Scraping page {i+1}')
@@ -104,4 +107,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_bbf()
