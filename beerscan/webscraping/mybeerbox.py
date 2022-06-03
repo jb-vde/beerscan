@@ -1,3 +1,4 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import urllib.request
@@ -39,6 +40,9 @@ def parse(html):
             urllib.request.urlretrieve(image_url, image_path)
             if crop_image(image_path):
                 beers.append({"beer_name":beer_name, "image_path": image_name})
+            else:
+                os.remove(image_path)
+
         else:
             print(f"Error for {beer_name}")
     return beers
