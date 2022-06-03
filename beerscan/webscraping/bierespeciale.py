@@ -48,7 +48,10 @@ def download_images(scrape_results, path):
             if crop_image(img_path):
                 image_path.append(image_name)
             else:
-                os.remove(img_path)
+                # The beer "urine" appears twice, once without picture, creating a shitstorm
+                # This got me real tired so I'm just quickfixing for now by deleting the remove statement
+                # TODO: FIX THIS
+                # os.remove(img_path)
                 names = names[names != beer_name]
                 images = images[images != image_url]
         except:
