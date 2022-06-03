@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.request
 import pandas as pd
+from beerscan.webscraping.belgianbeerfactory import crop_image
 
 
 def scrape_from_internet(npage=1, start_page=1):
@@ -30,20 +31,22 @@ def parse(html):
         image_url = f'https:{image_url}'
         extension = image_url.split('.')[-1]
         beer_name_img = "_".join(beer_name.replace('-', ' ').split())
-        image_path = f'mbb_{beer_name_img}.{extension}'
+        image_name = f'mbb_{beer_name_img}.{extension}'
 
         r = requests.get(image_url, stream=True)
         if r.status_code == 200:
-            urllib.request.urlretrieve(image_url, f"raw_data/images/mbb/{image_path}")
-            beers.append({"beer_name":beer_name, "image_path": image_path})
+            image_path = f"raw_data/images/{image_name}"
+            urllib.request.urlretrieve(image_url, image_path)
+            if crop_image(image_path):
+                beers.append({"beer_name":beer_name, "image_path": image_name})
         else:
             print(f"Error for {beer_name}")
     return beers
 
 
-def main():
+def main_mbb():
     beers = []
-    for i, page in enumerate(scrape_from_internet(1)):
+    for i, page in enumerate(scrape_from_internet(19)):
         print(f'Scraping page {i+1}')
         beers += (parse(page.content))
     df = pd.DataFrame(beers)
@@ -52,4 +55,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_mbb()

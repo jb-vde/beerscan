@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import re
 
+from beerscan.webscraping.belgianbeerfactory import crop_image
+
 def scrape_images(url):
     html = requests.get(url)
     soup = BeautifulSoup(html.content, 'html.parser')
@@ -39,15 +41,20 @@ def download_images(scrape_results, path):
                               .replace("\\", " ") + extension
         image_name = "_".join(image_name.split())
         try:
-            urlretrieve(image_url, path + image_name)
-            image_path.append(image_name)
+            img_path = path + image_name
+            urlretrieve(image_url, img_path)
+            if crop_image(img_path):
+                image_path.append(image_name)
+            else:
+                names = names[names != beer_name]
+                images = images[images != image_url]
         except:
             print(beer_name, image_url)
             names = names[names != beer_name]
             images = images[images != image_url]
             print(f"\t> Couldn't download {image_url}")
 
-    return pd.DataFrame({"name": names,
+    return pd.DataFrame({"beer_name": names,
                          "image_path": image_path,
                          "image_url": images})
 
@@ -62,14 +69,18 @@ def scrape_next_page(url):
     return None
 
 
-if __name__ == "__main__":
+def main_bs():
     next = "https://biere-speciale.be/fr/3-les-bieres"
-    data = pd.DataFrame({"name":[], "image_path":[]})
+    data = pd.DataFrame({"beer_name":[], "image_path":[]})
 
     while next:
         print("scraping ", next, "...")
-        dl_info = download_images(scrape_images(next), "raw_data/images/bs/")
+        dl_info = download_images(scrape_images(next), "raw_data/images/bs_")
         data = pd.concat([data, dl_info.drop(columns=["image_url"])], ignore_index=True)
         next = scrape_next_page(next)
 
     data.to_csv("raw_data/csv/bs_scraping.csv")
+
+
+if __name__ == "__main__":
+    main_bs()
