@@ -1,4 +1,3 @@
-from enum import EnumMeta
 from annoy import AnnoyIndex
 import time
 
