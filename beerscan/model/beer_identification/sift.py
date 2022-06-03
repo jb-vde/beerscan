@@ -75,8 +75,13 @@ if __name__ == "__main__":
     start_time = time.time()
 
     n_features = 300  # Number of features to extract from images
-    image_directory = "raw_data/images/bbf/" # Dataset directory
+    image_directory = "raw_data/images/" # Dataset directory
+
     images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv", index_col=0) # CSV describing dataset
+    images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bh_scraping.csv", index_col=0)])
+    images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bs_scraping.csv", index_col=0)])
+    images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
+
     IMG = cv.imread('raw_data/images/cropped_img.jpg') # Image to identify
 
     # Cleaning packs and "lots"
@@ -113,9 +118,11 @@ if __name__ == "__main__":
         vec_dim = len(dataset_sift["descriptor"].iloc[0])
 
         try:
+            print("Trying to load ANNOY model")
             annoy = annoy_est.load_annoy(vec_dim, ANN_MODEL_PATH)
             print("Loaded ANNOY Model !")
         except IOError:
+            print("Building ANNOY model")
             annoy = annoy_est.build_from_df(vec_dim, dataset_sift)
             annoy.save(ANN_MODEL_PATH)
             print("Built and Saved ANNOY Model")

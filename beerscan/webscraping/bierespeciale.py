@@ -41,7 +41,7 @@ def download_images(scrape_results, path):
                               .replace("\\", " ") + extension
         image_name = "_".join(image_name.split())
         try:
-            img_path = path + image_name
+            img_path = path + "bs_" + image_name
             urlretrieve(image_url, img_path)
             if crop_image(img_path):
                 image_path.append(image_name)
@@ -75,7 +75,7 @@ def main_bs():
 
     while next:
         print("scraping ", next, "...")
-        dl_info = download_images(scrape_images(next), "raw_data/images/bs_")
+        dl_info = download_images(scrape_images(next), "raw_data/images/")
         data = pd.concat([data, dl_info.drop(columns=["image_url"])], ignore_index=True)
         next = scrape_next_page(next)
 
