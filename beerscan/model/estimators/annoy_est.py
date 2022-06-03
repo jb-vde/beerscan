@@ -1,35 +1,81 @@
 from annoy import AnnoyIndex
 import time
 
-def annoy(img_descriptors, data_descriptors, metric="euclidean", trees=10, verbose=0):
 
-    if verbose == 1:
+def build_annoy(data_descriptors, metric="angular", n_trees=10, verbose=False,
+                save_model=True):
+
+    if verbose:
         print("\n> ANNOY estimator")
         start_time = time.time()
 
-    vec_dim = len(img_descriptors[0])
+    vec_dim = len(data_descriptors[0])
     annoy = AnnoyIndex(vec_dim, metric)
+
     for i, vect in enumerate(data_descriptors):
 
-        if verbose == 1:
+        if verbose:
             print(f"\rBuilding ANNOY : {i}", end="")
 
         annoy.add_item(i, vect)
-    annoy.build(trees)
 
-    if verbose == 1:
-        counter = 0
-        print("\n")
+    annoy.build(n_trees)
+
+    if verbose:
+        build_time = time.time() - start_time
+        print(f"ANNOY built in {build_time} seconds")
+
+    if save_model:
+        annoy.save('model.ann')
+
+    return annoy
+
+
+def run_annoy(img_descriptors, annoy, verbose):
 
     neighbors = []
 
-    for vect in img_descriptors:
+    if verbose:
+        print("\n> Start ANNOY search")
+        start_time = time.time()
 
-        if verbose == 1:
-            print(f"\rcomputing {counter}", end=" ")
-            counter += 1
+    for i, vect in enumerate(img_descriptors):
+
+        if verbose:
+            print(f"\rcomputing {i}", end=" ")
         neighbors.append(annoy.get_nns_by_vector(vect, 5, search_k=-1, include_distances=False))
 
-    if verbose == 1:
-        print("\n--- %s seconds ---" % (time.time() - start_time))
+    if verbose:
+        run_time = time.time() - start_time
+        print(f"ANNOY ran in {run_time} seconds")
+
+    return neighbors
+
+
+def load_annoy(vector_dim):
+
+    annoy = AnnoyIndex(vector_dim)
+    annoy.load('model.ann')
+
+    return annoy
+
+
+
+def annoy_from_data(img_descriptors, data_descriptors, metric="angular",
+                    n_trees=10, verbose=False, save_model=True):
+
+    annoy = build_annoy(data_descriptors, metric=metric,
+                        n_trees=n_trees, verbose=verbose, save_model=save_model)
+
+    neighbors = run_annoy(img_descriptors, annoy, verbose)
+
+    return neighbors
+
+
+def annoy_from_model(img_descriptors, verbose=False):
+
+    vector_dim = len(img_descriptors[0])
+    annoy = load_annoy(vector_dim)
+    neighbors = run_annoy(img_descriptors, annoy, verbose)
+
     return neighbors
