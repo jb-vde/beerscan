@@ -71,6 +71,7 @@ if __name__ == "__main__":
     DRAW_FEATURES = True
 
     ANN_MODEL_PATH = "beerscan/data/model.ann"
+    SIFT_DATASET_PATH = "beerscan/data/dataset_sift.csv"
 
     start_time = time.time()
 
@@ -89,9 +90,13 @@ if __name__ == "__main__":
     # SIFT on dataset #
     ###################
 
-    dataset_sift = sift_from_dataframe(images_df, verbose=True)
-
-    # TODO: Save / Load sift
+    try:
+        dataset_sift = pd.read_csv(SIFT_DATASET_PATH)
+        print("Loaded SIFT dataset !")
+    except IOError:
+        dataset_sift = sift_from_dataframe(images_df, verbose=True)
+        dataset_sift.to_csv(SIFT_DATASET_PATH)
+        print("Built and Saved SIFT Model")
 
     print(dataset_sift)
 
