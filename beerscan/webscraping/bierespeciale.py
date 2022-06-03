@@ -1,3 +1,4 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.request import urlretrieve
@@ -40,12 +41,14 @@ def download_images(scrape_results, path):
                               .replace("-", " ")\
                               .replace("\\", " ") + extension
         image_name = "_".join(image_name.split())
+        image_name = "bs_" + image_name
         try:
             img_path = path + "bs_" + image_name
             urlretrieve(image_url, img_path)
             if crop_image(img_path):
                 image_path.append(image_name)
             else:
+                os.remove(img_path)
                 names = names[names != beer_name]
                 images = images[images != image_url]
         except:
