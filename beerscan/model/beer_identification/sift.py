@@ -5,6 +5,7 @@ import pandas as pd
 import cv2 as cv
 from scipy import ndimage, misc
 import os
+from beerscan.webscraping.belgianbeerfactory import crop_image
 
 
 from sklearn.neighbors import NearestNeighbors
@@ -83,7 +84,11 @@ if __name__ == "__main__":
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bs_scraping.csv", index_col=0)])
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
 
-    IMG = cv.imread('raw_data/images/cropped_img.jpg') # Image to identify
+
+    IMG_PATH = 'raw_data/images/test_img/test.jpg'
+    crop_image(IMG_PATH)
+    IMG = cv.imread(IMG_PATH) # Image to identify
+
 
     # Cleaning packs and "lots"
     print(f'Dataset shape before cleaning : {images_df.shape}')
@@ -120,7 +125,7 @@ if __name__ == "__main__":
     #########################################
     if ANNOY:
 
-        vec_dim = len(dataset_sift["descriptor"].iloc[0])
+        vec_dim = len(descriptors[0])
 
         try:
             print("Trying to load ANNOY model")
