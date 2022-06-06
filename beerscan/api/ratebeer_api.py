@@ -54,7 +54,7 @@ def search_beer(beer_name):
 
 def main():
 
-    beer_name = "1B2T mermaid"
+    beer_name = "westvleteren"
     response = search_beer(beer_name)
 
     print(response)
