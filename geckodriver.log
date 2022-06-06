@@ -2027,3 +2027,23 @@ Read port: 57014
 
 ###!!! [Parent][PImageBridgeParent] Error: RunMessage(msgname=PImageBridge::Msg_WillClose) Channel closing: too late to send/recv, messages will be lost
 
+1654526582433	geckodriver	INFO	Listening on 127.0.0.1:57390
+1654526582947	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "--marionette" "-headless" "--remote-debugging-port" "57391" "--remote-allow-hosts" "localhost" "-foreground" "-no-remote" "-profile" "/var/folders/26/zk52pgg12hg_jj7brdx166mw0000gn/T/rust_mozprofile1KBmDz"
+*** You are running in headless mode.
+2022-06-06 16:43:03.369 plugin-container[25751:4085654] nil host used in call to allowsSpecificHTTPSCertificateForHost
+2022-06-06 16:43:03.369 plugin-container[25751:4085654] nil host used in call to allowsAnyHTTPSCertificateForHost:
+1654526583384	Marionette	INFO	Marionette enabled
+WebDriver BiDi listening on ws://localhost:57391
+2022-06-06 16:43:03.413 plugin-container[25751:4085654] nil host used in call to allowsSpecificHTTPSCertificateForHost
+2022-06-06 16:43:03.413 plugin-container[25751:4085654] nil host used in call to allowsAnyHTTPSCertificateForHost:
+2022-06-06 16:43:03.414 plugin-container[25751:4085659] nil host used in call to allowsSpecificHTTPSCertificateForHost
+2022-06-06 16:43:03.414 plugin-container[25751:4085659] nil host used in call to allowsAnyHTTPSCertificateForHost:
+[GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /var/folders/26/zk52pgg12hg_jj7brdx166mw0000gn/T/rust_mozprofile1KBmDz/search.json.mozlz4", (void 0)))
+console.error: BackgroundUpdate: 
+  _reasonsToNotScheduleUpdates: Failed to check for Maintenance Service Registry Key: [Exception... "Component returned failure code: 0x80004001 (NS_ERROR_NOT_IMPLEMENTED) [nsIUpdateProcessor.getServiceRegKeyExists]"  nsresult: "0x80004001 (NS_ERROR_NOT_IMPLEMENTED)"  location: "JS frame :: resource://gre/modules/BackgroundUpdate.jsm :: _reasonsToNotScheduleUpdates :: line 241"  data: no]
+1654526584524	Marionette	INFO	Listening on port 57402
+DevTools listening on ws://localhost:57391/devtools/browser/c713ccf2-8c0b-48c7-ade8-c0b36e36e25a
+Read port: 57402
+1654526584600	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+1654526586342	Marionette	INFO	Stopped listening on port 57402
