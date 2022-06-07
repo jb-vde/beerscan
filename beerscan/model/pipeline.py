@@ -1,53 +1,7 @@
-<<<<<<< HEAD
-"""
-    Input JSON with images and boxes
-    Crop image based on boxes
-    Contrast cropped img
-    SIFT cropped img
-    Indentify by comparing features against dataset
-    return JSON with beer name.
-"""
-
-
-"""
-    IN :
-
-    img_dict = {
-        box1: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        },
-        box2: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        },
-        ...
-        boxN: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        }
-    }
-
-"""
-from sys import api_version
-from pandas import DataFrame
-from beerscan.api.ratebeer_api import search_beer
-from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
-from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
-import cv2
-from beerscan.model.beer_identification.image_enhance import contrast
-=======
 # Image Manipulation
 import cv2
 # Image Preprocessing
 from beer_identification.image_enhance import contrast
->>>>>>> f27b257a6151f45342f54bbccdc5fe01b30ec06c
 
 # Bottle Detection
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
@@ -69,7 +23,6 @@ def main_pipe(image:list) -> dict:
     Full pipeline to identify beers from a given image
         Parameters:
             image (list): an array representing an image
-
         Returns:
             data (dict): dictionnary with following keys:
                 startX (int) - X coordinate of top left corner\n
@@ -87,8 +40,8 @@ def main_pipe(image:list) -> dict:
     sift_dataset = load_sift_dataset()
 
     for key, box in data.items():
-        #print(box)
-        ##Crop Based on box
+        print(box)
+        #Crop Based on box
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
 
@@ -100,10 +53,6 @@ def main_pipe(image:list) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-<<<<<<< HEAD
-        #print(identification)
-=======
->>>>>>> f27b257a6151f45342f54bbccdc5fe01b30ec06c
 
         data[key]["beer_name"] = [name for name in identification]
         data[key]["info"] = search_beer(identification.iloc[0])
@@ -119,4 +68,4 @@ if __name__ == "__main__":
     # Test the pipe
     data = main_pipe(image)
 
-    #print(data)
+    print(data)
