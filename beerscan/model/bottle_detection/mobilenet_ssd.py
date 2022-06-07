@@ -26,8 +26,6 @@ def detect_bottles(image:list) -> dict:
                 endX   - X coordinate of bottom right corner\n
                 endY   - Y coordinate of bottom left corner\n
     """
-    # initialize the list of class labels MobileNet SSD was trained to
-    # detect, then generate a set of bounding box colors for each class
 
     # load our serialized model from disk
     net = cv2.dnn.readNetFromCaffe(PROTOTXT, CAFFE_MODEL)
