@@ -39,6 +39,8 @@ from pandas import DataFrame
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 import cv2
 
+import matplotlib.pyplot as plt
+
 # For pipe testing
 from beerscan.api.query import test_boxes_endpoint
 import base64
@@ -62,9 +64,9 @@ def main_pipe(boxes_dict:dict, image) -> dict:
         keypoints, descriptors = do_sift(image_cropped, NUM_FEATURES)
 
         # Identify cropped image
-
         sift_dataset = load_sift_dataset()
-        boxes_dict["boxes"][key]["beer_name"] = identify(descriptors, sift_dataset, number=1)["beer_name"]
+        identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
+        boxes_dict["boxes"][key]["beer_name"] = [name for name in identification]
 
     return boxes_dict
 
@@ -113,4 +115,12 @@ if __name__ == "__main__":
 
 
     # Test the pipe
-    print(main_pipe(data, image))
+    boxes = main_pipe(data, image)
+
+    # Draw rectangles and print image
+    for key, box in boxes["boxes"].items():
+        cv2.rectangle(image, (box["startX"], box["startY"]), (box["endX"], box["endY"]), (255,0,0), 2)
+        cv2.putText(image, box["beer_name"][0], (box["startX"], box["startY"]-10), cv2.FONT_HERSHEY_PLAIN, 1.0, (0,255,0), 2)
+
+    cv2.imshow('image', image)
+    cv2.waitKey(0)
