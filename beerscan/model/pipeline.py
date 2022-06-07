@@ -18,23 +18,26 @@ import base64
 NUM_FEATURES = 300
 
 
-def main_pipe(image) -> dict:
+def main_pipe(image:list) -> dict:
+    """
+    Full pipeline to identify beers from a given image
+        Parameters:
+            image (list): an array representing an image
 
+        Returns:
+            data (dict): dictionnary with following keys:
+                startX (int) - X coordinate of top left corner\n
+                startY (int) - Y coordinate of top left corner\n
+                endX   (int) - X coordinate of bottom right corner\n
+                endY   (int) - Y coordinate of bottom left corner\n
+                beer_name (str) - Name of the beer (raw)\n
+                info   (dict) - {"brewery", "beer", "style", "abv", "overall_score",
+                                "style_score", "star_rating", "n_reviews"}
     """
-    IN => IMG in bytes
-         v IMG_bytes => get boxes
-         v IMG to array
-         v for each box:
-         v   crop IMG_array according to box
-         v   Contrast cropped_IMG
-         v   Get features
-         v   Identify image
-            Retrieve beer info based on clean name
-            Add name, informations and boxes to dict
-    OUT =>return dict
-    """
+    # Get boxes
     data = detect_bottles(image)
 
+    # Load the sift dataset
     sift_dataset = load_sift_dataset()
 
     for key, box in data.items():
