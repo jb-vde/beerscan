@@ -36,11 +36,14 @@
 """
 from sys import api_version
 from pandas import DataFrame
+from beerscan.api.ratebeer_api import search_beer
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
+from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 import cv2
 from beer_identification.image_enhance import contrast
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 # For pipe testing
 from beerscan.api.query import test_boxes_endpoint
@@ -48,8 +51,13 @@ import base64
 
 NUM_FEATURES = 300
 
+def img_from_b64(image_b64):
+    image = base64.b64decode(image_b64)
+    image = np.frombuffer(image, dtype=np.uint8)
+    return cv2.imdecode(image, flags=1)
 
-def main_pipe(image_b64) -> dict:
+
+def main_pipe(image) -> dict:
 
     """
     IN => IMG in bytes
@@ -64,11 +72,12 @@ def main_pipe(image_b64) -> dict:
             Add name, informations and boxes to dict
     OUT =>return dict
     """
-    boxes = test_boxes_endpoint(image_b64)
-    image = base64.b64decode(image_b64)
-    image = cv2.imdecode(image, flags=1)
+    data = detect_bottles(image)
 
-    for key, box in boxes.items():
+    sift_dataset = load_sift_dataset()
+
+    for key, box in data.items():
+        print(box)
         #Crop Based on box
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
@@ -80,11 +89,14 @@ def main_pipe(image_b64) -> dict:
         keypoints, descriptors = do_sift(image_contrasted, NUM_FEATURES)
 
         # Identify cropped image
-        sift_dataset = load_sift_dataset()
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-        boxes[key]["beer_name"] = [name for name in identification]
+        print(identification)
 
-    return boxes
+        data[key]["beer_name"] = [name for name in identification]
+        #data[key]["info"] = search_beer(identification.iloc[0])
+        data[key]["info"] = {}
+
+    return data
 
 """
 OUT:
@@ -129,16 +141,7 @@ if __name__ == "__main__":
         im_bytes = f.read()
     img_b64 = base64.b64encode(im_bytes).decode("utf8")
 
-
-
-
     # Test the pipe
-    boxes = main_pipe(data, image)
+    data = main_pipe(img_b64)
 
-    # Draw rectangles and print image
-    for key, box in boxes["boxes"].items():
-        cv2.rectangle(image, (box["startX"], box["startY"]), (box["endX"], box["endY"]), (255,0,0), 2)
-        cv2.putText(image, box["beer_name"][0], (box["startX"], box["startY"]-10), cv2.FONT_HERSHEY_PLAIN, 1.0, (0,255,0), 2)
-
-    cv2.imshow('image', image)
-    cv2.waitKey(0)
+    print(data)
