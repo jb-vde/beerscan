@@ -82,4 +82,4 @@ async def predict_boxes(request: Request):
             dic = dict(zip(keys, box))
             boxes[f"box_{j}"] = dic
 
-    return {'boxes': boxes}
+    return boxes
