@@ -40,7 +40,7 @@ from beerscan.api.ratebeer_api import search_beer
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 import cv2
-from beer_identification.image_enhance import contrast
+from beerscan.model.beer_identification.image_enhance import contrast
 
 import matplotlib.pyplot as plt
 import numpy as np
