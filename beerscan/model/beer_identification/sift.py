@@ -119,7 +119,7 @@ if __name__ == "__main__":
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
 
 
-    IMG_PATH = 'raw_data/images/test_img/moinette.jpg'
+    IMG_PATH = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     crop_image(IMG_PATH)
     IMG = cv.imread(IMG_PATH) # Image to identify
 

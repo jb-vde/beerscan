@@ -38,6 +38,7 @@ from sys import api_version
 from pandas import DataFrame
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 import cv2
+from beer_identification.image_enhance import contrast
 
 import matplotlib.pyplot as plt
 
@@ -57,11 +58,13 @@ def main_pipe(boxes_dict:dict, image) -> dict:
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
 
+
         # Contrast cropped image
 
+        image_contrasted = contrast(image_cropped)
 
         # SIFT cropped image
-        keypoints, descriptors = do_sift(image_cropped, NUM_FEATURES)
+        keypoints, descriptors = do_sift(image_contrasted, NUM_FEATURES)
 
         # Identify cropped image
         sift_dataset = load_sift_dataset()
