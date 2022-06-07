@@ -1,7 +1,10 @@
+# Image Manipulaion
 import cv2
+
+# Data Structure
 import numpy as np
 
-# Model parameters
+# MobileNet / SSD parameters
 PROTOTXT = 'beerscan/model/bottle_detection/MobileNetSSD_deploy.prototxt.txt'
 CAFFE_MODEL = 'beerscan/model/bottle_detection/MobileNetSSD_deploy.caffemodel'
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -10,9 +13,19 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
         "sofa", "train", "tvmonitor"]
 
 
-def detect_bottles(image):
-    # initialize the list of class labels MobileNet SSD was trained to
-    # detect, then generate a set of bounding box colors for each class
+def detect_bottles(image:list) -> dict:
+    """
+    Generates a set of bounding box colors for each bottle in the given image
+        Parameters:
+            image (list): array representing an image
+
+        Returns:
+            boxes (dict): dictionnary with following keys:
+                startX (int) - X coordinate of top left corner\n
+                startY (int) - Y coordinate of top left corner\n
+                endX   (int) - X coordinate of bottom right corner\n
+                endY   (int) - Y coordinate of bottom left corner\n
+    """
 
     # load our serialized model from disk
     net = cv2.dnn.readNetFromCaffe(PROTOTXT, CAFFE_MODEL)

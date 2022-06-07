@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
     Input JSON with images and boxes
     Crop image based on boxes
@@ -41,39 +42,48 @@ from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, 
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 import cv2
 from beerscan.model.beer_identification.image_enhance import contrast
+=======
+# Image Manipulation
+import cv2
+# Image Preprocessing
+from beer_identification.image_enhance import contrast
+>>>>>>> f27b257a6151f45342f54bbccdc5fe01b30ec06c
 
-import matplotlib.pyplot as plt
-import numpy as np
+# Bottle Detection
+from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 
-# For pipe testing
-from beerscan.api.query import test_boxes_endpoint
+# Beer Identification
+from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
+from beerscan.api.ratebeer_api import search_beer
+
+# Bit Manipulation - for pipe testing
 import base64
 
+
+# SIFT Parameters
 NUM_FEATURES = 300
 
-def img_from_b64(image_b64):
-    image = base64.b64decode(image_b64)
-    image = np.frombuffer(image, dtype=np.uint8)
-    return cv2.imdecode(image, flags=1)
 
-
-def main_pipe(image) -> dict:
-
+def main_pipe(image:list) -> dict:
     """
-    IN => IMG in bytes
-         v IMG_bytes => get boxes
-         v IMG to array
-         v for each box:
-         v   crop IMG_array according to box
-         v   Contrast cropped_IMG
-         v   Get features
-         v   Identify image
-            Retrieve beer info based on clean name
-            Add name, informations and boxes to dict
-    OUT =>return dict
+    Full pipeline to identify beers from a given image
+        Parameters:
+            image (list): an array representing an image
+
+        Returns:
+            data (dict): dictionnary with following keys:
+                startX (int) - X coordinate of top left corner\n
+                startY (int) - Y coordinate of top left corner\n
+                endX   (int) - X coordinate of bottom right corner\n
+                endY   (int) - Y coordinate of bottom left corner\n
+                beer_name (str) - Name of the beer (raw)\n
+                info   (dict) - {"brewery", "beer", "style", "abv", "overall_score",
+                                "style_score", "star_rating", "n_reviews"}
     """
+    # Get boxes
     data = detect_bottles(image)
 
+    # Load the sift dataset
     sift_dataset = load_sift_dataset()
 
     for key, box in data.items():
@@ -90,48 +100,18 @@ def main_pipe(image) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
+<<<<<<< HEAD
         #print(identification)
+=======
+>>>>>>> f27b257a6151f45342f54bbccdc5fe01b30ec06c
 
         data[key]["beer_name"] = [name for name in identification]
         data[key]["info"] = search_beer(identification.iloc[0])
 
     return data
 
-"""
-OUT:
-
-    img_dict = {
-            box1: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name',
-                'info'
-            },
-            box2: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name'
-            },
-            ...
-            boxN: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name'
-            }
-        }
-    }
-
-"""
 
 if __name__ == "__main__":
-
-    # Get the boxes
 
     image_file = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     image = cv2.imread(image_file)
