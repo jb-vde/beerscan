@@ -16,6 +16,10 @@ from beerscan.model.estimators import annoy_est
 import time
 
 
+ANN_MODEL_PATH = "beerscan/data/model.ann"
+SIFT_DATASET_PATH = "beerscan/data/dataset_sift.csv"
+
+
 def do_sift(img, features):
 
     # SIFT doesn't care about colors and gray is faster than colours
@@ -65,18 +69,48 @@ def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFr
                              "descriptor" : descriptors})
 
 
+def load_sift_dataset():
+    try:
+        dataset_sift = pd.read_csv(SIFT_DATASET_PATH)
+    except IOError:
+        dataset_sift = sift_from_dataframe(images_df, verbose=True)
+        dataset_sift.to_csv(SIFT_DATASET_PATH)
+    return dataset_sift
+
+
+
+def identify(descriptors:list, sift_dataset:pd.DataFrame, number:int=1):
+
+    vec_dim = len(descriptors[0])
+
+    df = pd.DataFrame()
+    df["beer_name"] = list(set(sift_dataset['beer_name']))
+    df["score"] = 0
+
+    try:
+        annoy = annoy_est.load_annoy(vec_dim, ANN_MODEL_PATH)
+    except IOError:
+        annoy = annoy_est.build_from_df(vec_dim, sift_dataset)
+        annoy.save(ANN_MODEL_PATH)
+
+    neighbors = annoy_est.run_annoy(descriptors, annoy, verbose=False)
+
+    for group in neighbors:
+        for i in range(len(group)):
+            df.loc[df["beer_name"] == sift_dataset.at[group[i], "beer_name"], 'score'] += (len(group) - i)**2
+
+    return df.sort_values(by=["score"], ascending=False).head(5)[:number]
+
+
 
 if __name__ == "__main__":
 
     ANNOY = True
     DRAW_FEATURES = True
 
-    ANN_MODEL_PATH = "beerscan/data/model.ann"
-    SIFT_DATASET_PATH = "beerscan/data/dataset_sift.csv"
-
     start_time = time.time()
 
-    n_features = 300  # Number of features to extract from images
+    n_features = 200  # Number of features to extract from images
     image_directory = "raw_data/images/" # Dataset directory
 
     images_df = pd.read_csv("raw_data/csv/bbf_scraping.csv", index_col=0) # CSV describing dataset
@@ -85,7 +119,7 @@ if __name__ == "__main__":
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
 
 
-    IMG_PATH = 'raw_data/images/test_img/test.jpg'
+    IMG_PATH = 'raw_data/images/test_img/moinette.jpg'
     crop_image(IMG_PATH)
     IMG = cv.imread(IMG_PATH) # Image to identify
 
@@ -100,13 +134,8 @@ if __name__ == "__main__":
     # SIFT on dataset #
     ###################
 
-    try:
-        dataset_sift = pd.read_csv(SIFT_DATASET_PATH)
-        print("Loaded SIFT dataset !")
-    except IOError:
-        dataset_sift = sift_from_dataframe(images_df, verbose=True)
-        dataset_sift.to_csv(SIFT_DATASET_PATH)
-        print("Built and Saved SIFT Model")
+
+    dataset_sift = load_sift_dataset()
 
     print(dataset_sift)
 
@@ -125,25 +154,7 @@ if __name__ == "__main__":
     #########################################
     if ANNOY:
 
-        vec_dim = len(descriptors[0])
-
-        try:
-            print("Trying to load ANNOY model")
-            annoy = annoy_est.load_annoy(vec_dim, ANN_MODEL_PATH)
-            print("Loaded ANNOY Model !")
-        except IOError:
-            print("Building ANNOY model")
-            annoy = annoy_est.build_from_df(vec_dim, dataset_sift)
-            annoy.save(ANN_MODEL_PATH)
-            print("Built and Saved ANNOY Model")
-
-        neighbors = annoy_est.run_annoy(descriptors, annoy, verbose=False)
-
-        for group in neighbors:
-            for i in range(len(group)):
-                images_df.loc[images_df["beer_name"] == dataset_sift.at[group[i], "beer_name"], 'score'] += (len(group) - i)**2
-
-        print("\n",images_df.sort_values(by=["score"], ascending=False).head(5))
+        print("\n",identify(descriptors, dataset_sift, number = 3))
         print("--- %s seconds ---" % (time.time() - start_time))
 
         # TODO: Draw features on images
