@@ -1,60 +1,22 @@
-"""
-    Input JSON with images and boxes
-    Crop image based on boxes
-    Contrast cropped img
-    SIFT cropped img
-    Indentify by comparing features against dataset
-    return JSON with beer name
-"""
 
-
-"""
-    IN :
-
-    img_dict = {
-        box1: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        },
-        box2: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        },
-        ...
-        boxN: {
-            'startX',
-            'startY',
-            'endX',
-            'endY'
-        }
-    }
-
-"""
-from sys import api_version
-from pandas import DataFrame
-from beerscan.api.ratebeer_api import search_beer
-from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
-from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
+# Image Manipulation
 import cv2
+# Image Preprocessing
 from beer_identification.image_enhance import contrast
 
-import matplotlib.pyplot as plt
-import numpy as np
+# Bottle Detection
+from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 
-# For pipe testing
-from beerscan.api.query import test_boxes_endpoint
+# Beer Identification
+from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
+from beerscan.api.ratebeer_api import search_beer
+
+# Bit Manipulation - for pipe testing
 import base64
 
-NUM_FEATURES = 300
 
-def img_from_b64(image_b64):
-    image = base64.b64decode(image_b64)
-    image = np.frombuffer(image, dtype=np.uint8)
-    return cv2.imdecode(image, flags=1)
+# SIFT Parameters
+NUM_FEATURES = 300
 
 
 def main_pipe(image) -> dict:
@@ -90,58 +52,19 @@ def main_pipe(image) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-        print(identification)
 
         data[key]["beer_name"] = [name for name in identification]
-        #data[key]["info"] = search_beer(identification.iloc[0])
-        data[key]["info"] = {}
+        data[key]["info"] = search_beer(identification.iloc[0])
 
     return data
 
-"""
-OUT:
-
-    img_dict = {
-            box1: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name',
-                'info'
-            },
-            box2: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name'
-            },
-            ...
-            boxN: {
-                'startX',
-                'startY',
-                'endX',
-                'endY',
-                'beer_name'
-            }
-        }
-    }
-
-"""
 
 if __name__ == "__main__":
-
-    # Get the boxes
 
     image_file = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     image = cv2.imread(image_file)
 
-    with open(image_file, "rb") as f:
-        im_bytes = f.read()
-    img_b64 = base64.b64encode(im_bytes).decode("utf8")
-
     # Test the pipe
-    data = main_pipe(img_b64)
+    data = main_pipe(image)
 
     print(data)
