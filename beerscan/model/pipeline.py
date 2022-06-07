@@ -93,8 +93,7 @@ def main_pipe(image) -> dict:
         #print(identification)
 
         data[key]["beer_name"] = [name for name in identification]
-        #data[key]["info"] = search_beer(identification.iloc[0])
-        data[key]["info"] = {}
+        data[key]["info"] = search_beer(identification.iloc[0])
 
     return data
 
