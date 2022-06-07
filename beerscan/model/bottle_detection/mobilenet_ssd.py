@@ -21,10 +21,10 @@ def detect_bottles(image:list) -> dict:
 
         Returns:
             boxes (dict): dictionnary with following keys:
-                startX - X coordinate of top left corner\n
-                startY - Y coordinate of top left corner\n
-                endX   - X coordinate of bottom right corner\n
-                endY   - Y coordinate of bottom left corner\n
+                startX (int) - X coordinate of top left corner\n
+                startY (int) - Y coordinate of top left corner\n
+                endX   (int) - X coordinate of bottom right corner\n
+                endY   (int) - Y coordinate of bottom left corner\n
     """
 
     # load our serialized model from disk
