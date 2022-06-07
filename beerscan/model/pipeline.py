@@ -49,18 +49,31 @@ import base64
 NUM_FEATURES = 300
 
 
-def main_pipe(boxes_dict:dict, image) -> dict:
+def main_pipe(image_b64) -> dict:
 
-    for key, box in boxes_dict["boxes"].items():
+    """
+    IN => IMG in bytes
+         v IMG_bytes => get boxes
+         v IMG to array
+         v for each box:
+         v   crop IMG_array according to box
+         v   Contrast cropped_IMG
+         v   Get features
+         v   Identify image
+            Retrieve beer info based on clean name
+            Add name, informations and boxes to dict
+    OUT =>return dict
+    """
+    boxes = test_boxes_endpoint(image_b64)
+    image = base64.b64decode(image_b64)
+    image = cv2.imdecode(image, flags=1)
+
+    for key, box in boxes.items():
         #Crop Based on box
-
-        print(box)
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
 
-
         # Contrast cropped image
-
         image_contrasted = contrast(image_cropped)
 
         # SIFT cropped image
@@ -69,35 +82,37 @@ def main_pipe(boxes_dict:dict, image) -> dict:
         # Identify cropped image
         sift_dataset = load_sift_dataset()
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-        boxes_dict["boxes"][key]["beer_name"] = [name for name in identification]
+        boxes[key]["beer_name"] = [name for name in identification]
 
-    return boxes_dict
+    return boxes
 
 """
 OUT:
 
     img_dict = {
-        box1: {
-            'startX',
-            'startY',
-            'endX',
-            'endY',
-            'beer_name'
-        },
-        box2: {
-            'startX',
-            'startY',
-            'endX',
-            'endY',
-            'beer_name'
-        },
-        ...
-        boxN: {
-            'startX',
-            'startY',
-            'endX',
-            'endY',
-            'beer_name'
+            box1: {
+                'startX',
+                'startY',
+                'endX',
+                'endY',
+                'beer_name',
+                'info'
+            },
+            box2: {
+                'startX',
+                'startY',
+                'endX',
+                'endY',
+                'beer_name'
+            },
+            ...
+            boxN: {
+                'startX',
+                'startY',
+                'endX',
+                'endY',
+                'beer_name'
+            }
         }
     }
 
@@ -114,7 +129,7 @@ if __name__ == "__main__":
         im_bytes = f.read()
     img_b64 = base64.b64encode(im_bytes).decode("utf8")
 
-    data = test_boxes_endpoint(img_b64)
+
 
 
     # Test the pipe
