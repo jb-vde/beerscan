@@ -4,7 +4,7 @@
     Contrast cropped img
     SIFT cropped img
     Indentify by comparing features against dataset
-    return JSON with beer name
+    return JSON with beer name.
 """
 
 
