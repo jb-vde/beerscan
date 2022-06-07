@@ -1,4 +1,3 @@
-
 # Image Manipulation
 import cv2
 # Image Preprocessing
