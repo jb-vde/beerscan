@@ -40,7 +40,7 @@ from beerscan.api.ratebeer_api import search_beer
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 import cv2
-from beer_identification.image_enhance import contrast
+from beerscan.model.beer_identification.image_enhance import contrast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -77,8 +77,8 @@ def main_pipe(image) -> dict:
     sift_dataset = load_sift_dataset()
 
     for key, box in data.items():
-        print(box)
-        #Crop Based on box
+        #print(box)
+        ##Crop Based on box
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
 
@@ -90,7 +90,7 @@ def main_pipe(image) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-        print(identification)
+        #print(identification)
 
         data[key]["beer_name"] = [name for name in identification]
         #data[key]["info"] = search_beer(identification.iloc[0])
@@ -137,11 +137,7 @@ if __name__ == "__main__":
     image_file = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     image = cv2.imread(image_file)
 
-    with open(image_file, "rb") as f:
-        im_bytes = f.read()
-    img_b64 = base64.b64encode(im_bytes).decode("utf8")
-
     # Test the pipe
-    data = main_pipe(img_b64)
+    data = main_pipe(image)
 
-    print(data)
+    #print(data)
