@@ -93,8 +93,7 @@ def main_pipe(image) -> dict:
         print(identification)
 
         data[key]["beer_name"] = [name for name in identification]
-        #data[key]["info"] = search_beer(identification.iloc[0])
-        data[key]["info"] = {}
+        data[key]["info"] = search_beer(identification.iloc[0])
 
     return data
 
@@ -137,11 +136,7 @@ if __name__ == "__main__":
     image_file = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     image = cv2.imread(image_file)
 
-    with open(image_file, "rb") as f:
-        im_bytes = f.read()
-    img_b64 = base64.b64encode(im_bytes).decode("utf8")
-
     # Test the pipe
-    data = main_pipe(img_b64)
+    data = main_pipe(image)
 
     print(data)
