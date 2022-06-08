@@ -1,7 +1,6 @@
 # Image Manipulation
 import cv2
-# Image Preprocessing
-from beer_identification.image_enhance import contrast
+from beerscan.model.beer_identification.image_enhance import contrast
 
 # Bottle Detection
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
@@ -9,9 +8,6 @@ from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 # Beer Identification
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 from beerscan.api.ratebeer_api import search_beer
-
-# Bit Manipulation - for pipe testing
-import base64
 
 
 # SIFT Parameters
