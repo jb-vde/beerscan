@@ -29,7 +29,7 @@ memoized-property
 termcolor
 fastapi
 uvicorn
-opencv-python
+opencv-python==4.5.5.64
 requests
 pybase64
 python-multipart
