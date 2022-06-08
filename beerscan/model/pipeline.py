@@ -19,7 +19,6 @@ def main_pipe(image:list) -> dict:
     Full pipeline to identify beers from a given image
         Parameters:
             image (list): an array representing an image
-
         Returns:
             data (dict): dictionnary with following keys:
                 startX (int) - X coordinate of top left corner\n
