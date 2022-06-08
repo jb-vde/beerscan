@@ -68,7 +68,7 @@ def search_beer(beer_name):
     driver.get(f'https://www.ratebeer.com/search?q={query}&tab=beer')
 
     try:
-        beer = WebDriverWait(driver, 100).until(EC.presence_of_element_located(
+        beer = WebDriverWait(driver, 15).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "div[class='fg-1']")))
         beer_text = beer.get_attribute('innerText')
         beer_info_list = beer_text.split('\n')
