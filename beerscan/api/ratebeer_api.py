@@ -42,6 +42,8 @@ def api_response(beer_info_list):
     value_list = [el for el in beer_info_list if not el.startswith("Available")]
     #value_list = [el.split('•') for el in value_list]
     value_list = flatten(value_list)
+    print("I went here")
+    print(value_list)
 
     return dict(zip(key_list, value_list))
 
