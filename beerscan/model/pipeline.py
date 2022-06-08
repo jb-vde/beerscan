@@ -49,7 +49,7 @@ def main_pipe(image:list) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
-        #identification = identification[identification["score"] > 70]["beer_name"]
+        identification = identification[identification["score"] > 70]["beer_name"]
 
         data[key]["beer_name"] = [name for name in identification]
         data[key]["info"] = search_beer(identification.iloc[0])

@@ -85,7 +85,7 @@ def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFr
                             "descriptor" : descriptors})
 
 
-def load_sift_dataset(images_df):
+def load_sift_dataset(images_df=False):
     try:
         dataset_sift = pd.read_csv(SIFT_DATASET_PATH)
     except IOError:
