@@ -1,26 +1,35 @@
-from pyexpat import model
-from selectors import DefaultSelector
+# Data Structures
 import numpy as np
 import pandas as pd
+
+# Image Manipulation
 import cv2 as cv
-from scipy import ndimage, misc
-import os
+from beerscan.model.beer_identification.image_enhance import contrast
 from beerscan.webscraping.belgianbeerfactory import crop_image
 
+# OS Path Manipluation
+import os
 
-from sklearn.neighbors import NearestNeighbors
-
+# Model Estimator
 from beerscan.model.estimators import annoy_est
 
-
+# For testing and debugging
 import time
 
-
+# Saved Models
 ANN_MODEL_PATH = "beerscan/data/model.ann"
 SIFT_DATASET_PATH = "beerscan/data/dataset_sift.csv"
 
 
-def do_sift(img, features):
+def do_sift(img:list, features:int) -> tuple:
+    """
+    Extracts image features based on the SIFT algorithm
+        Parameters:
+            img      (list) : array representing an image
+            features (int) : number of features to extract
+        Returns:
+            (tuple): (keypoints, descriptors)
+    """
 
     # SIFT doesn't care about colors and gray is faster than colours
     gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
@@ -33,43 +42,50 @@ def do_sift(img, features):
 
 
 def draw_keypoints(img, keypoints):
+    # Not used currently
     gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
     return cv.drawKeypoints(gray,keypoints,img,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 
 def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFrame:
-        beer_names = []
-        keypoints = []
-        descriptors = []
+    """
+
+    """
+    beer_names = []
+    keypoints = []
+    descriptors = []
+
+    if verbose:
+        print("> SIFT Dataset")
+        start_time = time.time()
+
+    # TODO: Check images_df format (columns match expectations)
+
+    for index, row in images_df.iterrows():
 
         if verbose:
-            print("> SIFT Dataset")
-            start_time = time.time()
+            print(f"\rcomputing {index}", end="")
 
-        # TODO: Check images_df format (columns match expectations)
+        img = cv.imread(os.path.join(image_directory, row["image_path"]))
 
-        for index, row in images_df.iterrows():
+        img = contrast(img)
 
-            if verbose:
-                print(f"\rcomputing {index}", end="")
+        kp, desc = do_sift(img, n_features)
+        for vector, keyp in zip(desc, kp):
+            descriptors.append(vector)
+            keypoints.append(keyp)
+            beer_names.append(row["beer_name"])
 
-            img = cv.imread(os.path.join(image_directory, row["image_path"]))
-            kp, desc = do_sift(img, n_features)
-            for vector, keyp in zip(desc, kp):
-                descriptors.append(vector)
-                keypoints.append(keyp)
-                beer_names.append(row["beer_name"])
+    if verbose:
+        run_time = time.time() - start_time
+        print(f"\nSIFT ran in {run_time} seconds")
 
-        if verbose:
-            run_time = time.time() - start_time
-            print(f"\nSIFT ran in {run_time} seconds")
-
-        return pd.DataFrame({"beer_name" : beer_names,
-                             "keypoint" : keypoints,
-                             "descriptor" : descriptors})
+    return pd.DataFrame({"beer_name" : beer_names,
+                            "keypoint" : keypoints,
+                            "descriptor" : descriptors})
 
 
-def load_sift_dataset():
+def load_sift_dataset(images_df):
     try:
         dataset_sift = pd.read_csv(SIFT_DATASET_PATH)
     except IOError:
@@ -105,7 +121,6 @@ def identify(descriptors:list, sift_dataset:pd.DataFrame, number:int=1):
 
 if __name__ == "__main__":
 
-    ANNOY = True
     DRAW_FEATURES = True
 
     start_time = time.time()
@@ -117,7 +132,7 @@ if __name__ == "__main__":
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bh_scraping.csv", index_col=0)])
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bs_scraping.csv", index_col=0)])
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
-
+    images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/manual_import.csv", index_col=0)])
 
     IMG_PATH = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     crop_image(IMG_PATH)
@@ -135,7 +150,7 @@ if __name__ == "__main__":
     ###################
 
 
-    dataset_sift = load_sift_dataset()
+    dataset_sift = load_sift_dataset(images_df)
 
     print(dataset_sift)
 
@@ -152,32 +167,8 @@ if __name__ == "__main__":
     # Approximate Nearest Neighbors Oh Yeah #
     #    https://github.com/spotify/annoy   #
     #########################################
-    if ANNOY:
 
-        print("\n",identify(descriptors, dataset_sift, number = 3))
-        print("--- %s seconds ---" % (time.time() - start_time))
+    print("\n",identify(descriptors, dataset_sift, number = 3))
+    print("--- %s seconds ---" % (time.time() - start_time))
 
-        # TODO: Draw features on images
-
-
-
-    ###########################
-    # KNN to compare features #
-    ###########################
-    else:
-        print("\n####  KNN  ####\n")
-        knn = NearestNeighbors(n_neighbors=5, n_jobs=-1)
-        knn.fit(all_descriptors)
-
-        print("> KNN Descriptors")
-
-        counter = 0
-        for vect in descriptors:
-            print(f"\rcomputing {counter}/{n_features}", end="")
-            neighbors = knn.kneighbors([vect], return_distance=False)[0]
-            for i in range(len(neighbors)):
-                images_df.loc[images_df['beer_name'] == mapping[neighbors[i]], 'score'] += (len(neighbors) - i)**2
-            counter+=1
-
-        print("\n",images_df.sort_values(by=["score"], ascending=False).head(5))
-        print("--- %s seconds ---" % (time.time() - start_time))
+    # TODO: Draw features on images
