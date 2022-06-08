@@ -48,7 +48,7 @@ def main_pipe(image:list) -> dict:
         keypoints, descriptors = do_sift(image_contrasted, NUM_FEATURES)
 
         # Identify cropped image
-        identification = identify(descriptors, sift_dataset, number=1)["beer_name"]
+        identification = identify(descriptors, sift_dataset, number=1)
         identification = identification[identification["score"] > 70]["beer_name"]
 
         data[key]["beer_name"] = [name for name in identification]

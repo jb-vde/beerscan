@@ -17,8 +17,6 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 # Set display port as an environment variable (Selenium uses this one)
 ENV DISPLAY=:99
 
-
-COPY beerscan /beerscan
 COPY requirements.txt /requirements.txt
 #COPY /Users/jbvandeneynde/code/jb-vde/gcp/wagon-data-bootcamp-346912-79b16cf34457.json /credentials.json
 
@@ -26,5 +24,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6  -y
+
+COPY beerscan /beerscan
 
 CMD uvicorn beerscan.api.fast:app --host 0.0.0.0 --port $PORT
