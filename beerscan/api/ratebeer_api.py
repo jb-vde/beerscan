@@ -59,7 +59,6 @@ def load_driver():
 
     return driver
 
-
 def search_beer(beer_name):
 
     driver = load_driver()
@@ -68,16 +67,23 @@ def search_beer(beer_name):
     driver.get(f'https://www.ratebeer.com/search?q={query}&tab=beer')
 
     try:
-        beer = WebDriverWait(driver, 15).until(EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "div[class='fg-1']")))
+        beer = WebDriverWait(driver, 10).until(
+            EC.any_of(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='fg-1']")),
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div.p-4.fd-c.fa-c"))
+            )
+        )
+
         beer_text = beer.get_attribute('innerText')
-        beer_info_list = beer_text.split('\n')
+        print(beer_text)
+        if beer_text == 'No matches found':
+            beer_info_list = []
+        else:
+            beer_info_list = beer_text.split('\n')
 
     except TimeoutException:
         print("Loading took too much time!")
         beer_info_list = []
-
-
 
     driver.quit()
 
@@ -86,7 +92,7 @@ def search_beer(beer_name):
 
 def main():
 
-    beer_name = "guinness - 33cl"
+    beer_name = "jupiler sans alcool - 33cl"
     response = search_beer(beer_name)
 
     print(response)
