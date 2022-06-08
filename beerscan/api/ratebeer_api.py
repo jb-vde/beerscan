@@ -37,10 +37,10 @@ def make_query(beer_name):
 
 def api_response(beer_info_list):
 
-    key_list = ["brewery", "beer", "style", "abv", "overall_score",
+    key_list = ["brewery", "beer", "style", "overall_score",
                 "style_score", "star_rating", "n_reviews"]
     value_list = [el for el in beer_info_list if not el.startswith("Available")]
-    value_list = [el.split('•') for el in value_list]
+    #value_list = [el.split('•') for el in value_list]
     value_list = flatten(value_list)
 
     return dict(zip(key_list, value_list))
@@ -63,21 +63,22 @@ def load_driver():
 def search_beer(beer_name):
 
     driver = load_driver()
-
+    print(beer_name)
     query = make_query(beer_name)
     driver.get(f'https://www.ratebeer.com/search?q={query}&tab=beer')
 
     try:
-        beer = WebDriverWait(driver, 10).until(EC.presence_of_element_located(
+        beer = WebDriverWait(driver, 100).until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "div[class='fg-1']")))
+        beer_text = beer.get_attribute('innerText')
+        beer_info_list = beer_text.split('\n')
 
     except TimeoutException:
         print("Loading took too much time!")
-        beer = None
+        beer_info_list = []
 
 
-    beer_text = beer.get_attribute('innerText')
-    beer_info_list = beer_text.split('\n')
+
     driver.quit()
 
     return api_response(beer_info_list)

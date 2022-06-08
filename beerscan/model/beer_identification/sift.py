@@ -1,9 +1,6 @@
-from pyexpat import model
-from selectors import DefaultSelector
 import numpy as np
 import pandas as pd
 import cv2 as cv
-from scipy import ndimage, misc
 import os
 from beerscan.webscraping.belgianbeerfactory import crop_image
 

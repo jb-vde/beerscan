@@ -33,3 +33,7 @@ opencv-python
 requests
 pybase64
 python-multipart
+selenium
+webdriver-manager
+bs4
+annoy

@@ -52,7 +52,7 @@ def detect_bottles(image:list) -> dict:
         # greater than the minimum confidence
 
 
-        if is_bottle and confidence > 0.8:
+        if is_bottle and confidence > 0.5:
             j += 1
             # extract the index of the class label from the `detections`,
             # then compute the (x, y)-coordinates of the bounding box for
