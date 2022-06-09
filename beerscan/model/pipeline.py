@@ -44,10 +44,12 @@ def main_pipe(image:list) -> dict:
         image_cropped = image[startY:endY, startX:endX, :]
 
         # Resize
-        cropped_resize = image_resize(image_cropped, width = 200)
+        width = image_cropped.shape[1]
+        if width > 200:
+            image_cropped = image_resize(image_cropped, width = 200)
 
         # Contrast cropped image
-        image_contrasted = contrast(cropped_resize)
+        image_contrasted = contrast(image_cropped)
 
         # SIFT cropped image
         keypoints, descriptors = do_sift(image_contrasted, NUM_FEATURES)
