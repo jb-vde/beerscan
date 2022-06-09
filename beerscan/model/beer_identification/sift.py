@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 # Image Manipulation
-import cv2 as cv
+import cv2
 from beerscan.model.beer_identification.image_enhance import contrast
 from beerscan.webscraping.belgianbeerfactory import crop_image
 
@@ -32,8 +32,8 @@ def do_sift(img:list, features:int) -> tuple:
     """
 
     # SIFT doesn't care about colors and gray is faster than colours
-    gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-    sift = cv.SIFT_create(nfeatures=features)
+    gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    sift = cv2.SIFT_create(nfeatures=features)
     keypoints, descriptors = sift.detectAndCompute(gray,None)
 
     # Bug in sift function, sometimes returns n+1 features
@@ -43,8 +43,8 @@ def do_sift(img:list, features:int) -> tuple:
 
 def draw_keypoints(img, keypoints):
     # Not used currently
-    gray= cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-    return cv.drawKeypoints(gray,keypoints,img,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    return cv2.drawKeypoints(gray,keypoints,img,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 
 def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFrame:
@@ -66,7 +66,7 @@ def sift_from_dataframe(images_df:pd.DataFrame, verbose:bool=False) -> pd.DataFr
         if verbose:
             print(f"\rcomputing {index}", end="")
 
-        img = cv.imread(os.path.join(image_directory, row["image_path"]))
+        img = cv2.imread(os.path.join(image_directory, row["image_path"]))
 
         img = contrast(img)
 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     IMG_PATH = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     crop_image(IMG_PATH)
-    IMG = cv.imread(IMG_PATH) # Image to identify
+    IMG = cv2.imread(IMG_PATH) # Image to identify
 
 
     # Cleaning packs and "lots"
