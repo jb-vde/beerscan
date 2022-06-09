@@ -6,9 +6,7 @@ from beerscan.model.beer_identification.image_enhance import contrast
 from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 
 # Beer Identification
-from beerscan.model.beer_identification.sift import draw_keypoints, load_sift_dataset, do_sift, identify
-from beerscan.api.ratebeer_api import search_beer
-from beerscan.model.pipeline import NUM_FEATURES
+from beerscan.model.beer_identification.sift import do_sift
 
 # SIFT parameters
 NUM_FEATURES = 300
