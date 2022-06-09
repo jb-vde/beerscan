@@ -8,6 +8,7 @@ from beerscan.model.bottle_detection.mobilenet_ssd import detect_bottles
 # Beer Identification
 from beerscan.model.beer_identification.sift import load_sift_dataset, do_sift, identify
 from beerscan.api.ratebeer_api import search_beer
+from beerscan.model.utils import image_resize
 
 
 # SIFT Parameters
@@ -41,6 +42,11 @@ def main_pipe(image:list) -> dict:
         #Crop Based on box
         (startX, startY, endX, endY) = box["startX"], box["startY"], box["endX"], box["endY"]
         image_cropped = image[startY:endY, startX:endX, :]
+
+        # Resize
+        width = image_cropped.shape[1]
+        if width > 200:
+            image_cropped = image_resize(image_cropped, width = 200)
 
         # Contrast cropped image
         image_contrasted = contrast(image_cropped)
