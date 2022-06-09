@@ -133,6 +133,7 @@ if __name__ == "__main__":
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/bs_scraping.csv", index_col=0)])
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/mbb_scraping.csv", index_col=0)])
     images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/manual_import.csv", index_col=0)])
+    images_df = pd.concat([images_df, pd.read_csv("raw_data/csv/sb_scraping.csv", index_col=0)])
 
     IMG_PATH = 'raw_data/images/test_img/belgian_beer_tour.jpg'
     crop_image(IMG_PATH)
