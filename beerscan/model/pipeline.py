@@ -57,12 +57,12 @@ def main_pipe(image:list) -> dict:
 
 
     beer_informations = search_beer(to_identify)
-    for key, box in data.items():
+    for key, box in list(data.items()):
         if data[key]["beer_name"] and data[key]["beer_name"][0] in to_identify:
             # Pas très élégant mais j'ai pas trouvé mieux
             data[key]["info"] = beer_informations[to_identify.index(data[key]["beer_name"][0])]
         else:
-            data[key]["info"] = {}
+            del data[key]
 
     return data
 
