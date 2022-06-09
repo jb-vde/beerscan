@@ -45,8 +45,8 @@ def main_pipe(image:list) -> dict:
 
         # Resize
         width = image_cropped.shape[1]
-        if width > 200:
-            image_cropped = image_resize(image_cropped, width = 200)
+        if width > 150:
+            image_cropped = image_resize(image_cropped, width = 150)
 
         # Contrast cropped image
         image_contrasted = contrast(image_cropped)
@@ -56,7 +56,7 @@ def main_pipe(image:list) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)
-        identification = identification[identification["score"] > 70]
+        identification = identification[identification["score"] > 100]
         data[key]["beer_name"] = [name for name in identification["beer_name"]]
         if not identification["beer_name"].empty:
             to_identify.append(identification["beer_name"].iloc[0])
@@ -75,7 +75,7 @@ def main_pipe(image:list) -> dict:
 
 if __name__ == "__main__":
 
-    image_file = 'raw_data/images/test_img/belgian_beer_tour.jpg'
+    image_file = 'raw_data/images/test_img/kwak.png'
     image = cv2.imread(image_file)
 
     # Test the pipe
