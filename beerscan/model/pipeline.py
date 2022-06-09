@@ -34,6 +34,7 @@ def main_pipe(image:list) -> dict:
 
     # Load the sift dataset
     sift_dataset = load_sift_dataset()
+    to_identify = []
 
     for key, box in data.items():
         print(box)
@@ -49,12 +50,19 @@ def main_pipe(image:list) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)
-        identification = identification[identification["score"] > 70]["beer_name"]
-        print(identification)
+        identification = identification[identification["score"] > 70]
+        data[key]["beer_name"] = [name for name in identification["beer_name"]]
+        if not identification["beer_name"].empty:
+            to_identify.append(identification["beer_name"].iloc[0])
 
-        data[key]["beer_name"] = [name for name in identification]
 
-        data[key]["info"] = search_beer(identification.iloc[0])
+    beer_informations = search_beer(to_identify)
+    for key, box in data.items():
+        if data[key]["beer_name"] and data[key]["beer_name"][0] in to_identify:
+            # Pas très élégant mais j'ai pas trouvé mieux
+            data[key]["info"] = beer_informations[to_identify.index(data[key]["beer_name"][0])]
+        else:
+            data[key]["info"] = {}
 
     return data
 

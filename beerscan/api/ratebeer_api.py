@@ -38,10 +38,10 @@ def make_query(beer_name):
 def api_response(beer_info_list):
     res_info_list = []
     for beer_info in beer_info_list:
-        print(f"beer info list: {beer_info_list}")
+        print(f"beer info list: {beer_info}")
         key_list = ["brewery", "beer", "style", "overall_score",
                     "style_score", "star_rating", "n_reviews"]
-        value_list = [el for el in beer_info_list if not el.startswith("Available")]
+        value_list = [el for el in beer_info if not el.startswith("Available")]
         #value_list = [el.split('•') for el in value_list]
         #value_list = flatten(value_list)
         res_info_list.append(dict(zip(key_list, value_list)))
