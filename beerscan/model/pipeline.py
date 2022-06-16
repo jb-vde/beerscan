@@ -56,7 +56,7 @@ def main_pipe(image:list) -> dict:
 
         # Identify cropped image
         identification = identify(descriptors, sift_dataset, number=1)
-        identification = identification[identification["score"] > 100]
+        identification = identification[identification["score"] > 90]
         data[key]["beer_name"] = [name for name in identification["beer_name"]]
         if not identification["beer_name"].empty:
             to_identify.append(identification["beer_name"].iloc[0])
@@ -75,7 +75,7 @@ def main_pipe(image:list) -> dict:
 
 if __name__ == "__main__":
 
-    image_file = 'raw_data/images/test_img/kwak.png'
+    image_file = 'raw_data/images/test_img/taras_boulba.jpg'
     image = cv2.imread(image_file)
 
     # Test the pipe
